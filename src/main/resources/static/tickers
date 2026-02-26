@@ -1,0 +1,19 @@
+{
+  "tickers": [
+    { "symbol": "SBER", "name": "Сбербанк" },
+    { "symbol": "GAZP", "name": "Газпром" },
+    { "symbol": "LKOH", "name": "Лукойл" },
+    { "symbol": "ROSN", "name": "Роснефть" },
+    { "symbol": "NVTK", "name": "Новатэк" },
+    { "symbol": "GMKN", "name": "Норникель" },
+    { "symbol": "MGNT", "name": "Магнит" },
+    { "symbol": "VTBR", "name": "ВТБ" },
+    { "symbol": "TATN", "name": "Татнефть" },
+    { "symbol": "ALRS", "name": "Алроса" },
+    { "symbol": "MTSS", "name": "МТС" },
+    { "symbol": "POLY", "name": "Полиметалл" },
+    { "symbol": "CHMF", "name": "Северсталь" },
+    { "symbol": "MOEX", "name": "Московская биржа" },
+    { "symbol": "AFLT", "name": "Аэрофлот" }
+  ]
+}
