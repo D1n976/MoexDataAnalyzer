@@ -1,4 +1,4 @@
-package com.example.demo.Services;
+package com.example.demo.service;
 
 import com.example.demo.model.MoexStockCandle;
 import org.springframework.stereotype.Service;

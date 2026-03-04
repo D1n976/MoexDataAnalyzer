@@ -1,7 +1,7 @@
 package com.example.demo.Controllers;
 
-import com.example.demo.Services.MoexAnalysisService;
-import com.example.demo.Services.MoexService;
+import com.example.demo.service.MoexAnalysisService;
+import com.example.demo.service.MoexService;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;

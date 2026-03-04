@@ -1,4 +1,4 @@
-package com.example.demo.Services;
+package com.example.demo.service;
 import com.example.demo.model.MoexStockCandle;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
