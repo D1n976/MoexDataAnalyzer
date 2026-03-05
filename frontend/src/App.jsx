@@ -42,7 +42,9 @@ const Login = ({ setAuth }) => {
                 setIsLogin(true);
             }
         } catch (err) {
-            alert("Ошибка: " + (err.response?.data || "Проверьте данные"));
+            const data = err.response?.data;
+            const msg = typeof data === 'string' ? data : data?.message || data?.error || "Проверьте данные";
+            alert("Ошибка: " + msg);
         }
     };
 
