@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import './App.css';
 
-const API = 'http://localhost:8081';
+const API = '';
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
 
 // --- ЗАЩИТА РОУТА ---
