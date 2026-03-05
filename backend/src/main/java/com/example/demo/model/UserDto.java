@@ -12,4 +12,8 @@ public class UserDto {
     public boolean passwordsMatch() {
         return pass != null && pass.equals(confirmPass);
     }
+
+    public String getName() { return name; }
+    public String getEmail() { return email; }
+    public String getPass() { return pass; }
 }
