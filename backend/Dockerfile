@@ -11,7 +11,7 @@ COPY src src
 RUN ./mvnw package -DskipTests -B
 
 # ── Stage 2: Runtime ─────────────────────────────────────────
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:25
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8081
