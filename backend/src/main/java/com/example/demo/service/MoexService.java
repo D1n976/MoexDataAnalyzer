@@ -9,7 +9,7 @@ import com.squareup.okhttp.Response;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -28,22 +28,43 @@ public class MoexService {
 
     public List<MoexStockCandle> GetData(String secid, LocalDate from, LocalDate till) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String url = String.format(
-                "https://iss.moex.com/iss/history/engines/stock/markets/shares/securities/%s.json?from=%s&till=%s",
-                secid, from.format(formatter), till.format(formatter)
-        );
-        Request r = new Request.Builder()
-                .url(url)
-                .header("Accept", "application/json")
-                .build();
+        List<MoexStockCandle> allCandles = new ArrayList<>();
+        int start = 0;
 
-        try {
-            Response response = client.newCall(r).execute();
-            return getStockCandles(response.body().string());
+        while (true) {
+            String url = String.format(
+                    "https://iss.moex.com/iss/history/engines/stock/markets/shares/securities/%s.json?from=%s&till=%s&start=%d",
+                    secid, from.format(formatter), till.format(formatter), start
+            );
+            Request r = new Request.Builder()
+                    .url(url)
+                    .header("Accept", "application/json")
+                    .build();
+            try {
+                Response response = client.newCall(r).execute();
+                String body = response.body().string();
+
+                List<MoexStockCandle> page = getStockCandles(body);
+                allCandles.addAll(page);
+
+                // Читаем курсор пагинации из history.cursor
+                JsonNode cursor = mapper.readTree(body).path("history.cursor");
+                JsonNode cursorData = cursor.path("data");
+                if (!cursorData.isArray() || cursorData.isEmpty()) break;
+
+                JsonNode row = cursorData.get(0);
+                int index    = row.get(0).asInt(); // INDEX
+                int total    = row.get(1).asInt(); // TOTAL
+                int pageSize = row.get(2).asInt(); // PAGESIZE
+
+                if (index + pageSize >= total) break;
+                start = index + pageSize;
+
+            } catch (Exception ex) {
+                break;
+            }
         }
-        catch (Exception ex){
-            return new ArrayList<>() {};
-        }
+        return allCandles;
     }
 
     private List<MoexStockCandle> getStockCandles(String json) throws JsonProcessingException {
@@ -81,7 +102,7 @@ public class MoexService {
     public List<String> getTickers() {
         ClassPathResource resource = new ClassPathResource("static/tickers");
         List<String> tickerList = new ArrayList<>(List.of());
-        try (FileInputStream stream = new FileInputStream(resource.getFile())) {
+        try (InputStream stream = resource.getInputStream()) {
 
             JsonNode root = mapper.readTree(new String(stream.readAllBytes(), StandardCharsets.UTF_8));
             JsonNode tickers = root.path("tickers");

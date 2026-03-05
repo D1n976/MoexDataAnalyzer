@@ -8,6 +8,8 @@ services:
       - POSTGRES_DB=moexDatabase
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d moexDatabase"]
       interval: 10s
@@ -15,7 +17,7 @@ services:
       retries: 5
 
   app:
-    build: .
+    build: ./backend
     container_name: moex_app
     ports:
       - "8081:8081"
@@ -23,7 +25,18 @@ services:
       - DB_URL=jdbc:postgresql://db:5432/moexDatabase
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
-      - CORS_ORIGIN=${CORS_ORIGIN}
+      - CORS_ORIGIN=http://localhost
     depends_on:
       db:
         condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: moex_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+
+volumes:
+  postgres_data:
