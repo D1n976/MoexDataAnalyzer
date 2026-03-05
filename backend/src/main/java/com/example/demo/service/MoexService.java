@@ -9,7 +9,7 @@ import com.squareup.okhttp.Response;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -81,7 +81,7 @@ public class MoexService {
     public List<String> getTickers() {
         ClassPathResource resource = new ClassPathResource("static/tickers");
         List<String> tickerList = new ArrayList<>(List.of());
-        try (FileInputStream stream = new FileInputStream(resource.getFile())) {
+        try (InputStream stream = resource.getInputStream()) {
 
             JsonNode root = mapper.readTree(new String(stream.readAllBytes(), StandardCharsets.UTF_8));
             JsonNode tickers = root.path("tickers");
