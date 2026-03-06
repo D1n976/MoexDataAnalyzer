@@ -18,14 +18,18 @@ const ProtectedRoute = ({ children, isAuthenticated }) => {
     return children;
 };
 
-// --- СТРАНИЦА ЛОГИНА (не изменять) ---
+// --- СТРАНИЦА ЛОГИНА ---
 const Login = ({ setAuth }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({ name: '', email: '', pass: '', confirmPass: '' });
+    const [pendingEmail, setPendingEmail] = useState(null); // email ожидающий верификации
+    const [code, setCode] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         const payload = isLogin
             ? { email: formData.email, password: formData.pass }
             : { name: formData.name, email: formData.email, pass: formData.pass, confirmPass: formData.confirmPass };
@@ -38,15 +42,61 @@ const Login = ({ setAuth }) => {
                 localStorage.setItem('isAuthenticated', 'true');
                 navigate('/dashboard');
             } else {
-                alert("Регистрация успешна! Теперь войдите.");
-                setIsLogin(true);
+                // Сервер отправил код — переходим на экран верификации
+                setPendingEmail(formData.email);
             }
         } catch (err) {
             const data = err.response?.data;
             const msg = typeof data === 'string' ? data : data?.message || data?.error || "Проверьте данные";
             alert("Ошибка: " + msg);
+        } finally {
+            setLoading(false);
         }
     };
+
+    const handleVerify = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await axios.post(`${API}/api/auth/verify`, { email: pendingEmail, code });
+            alert("Регистрация завершена! Войдите в аккаунт.");
+            setPendingEmail(null);
+            setIsLogin(true);
+        } catch (err) {
+            const data = err.response?.data;
+            const msg = typeof data === 'string' ? data : data?.message || data?.error || "Ошибка верификации";
+            alert("Ошибка: " + msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Экран ввода кода
+    if (pendingEmail) {
+        return (
+            <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '10px', fontFamily: 'Arial' }}>
+                <h2>Подтверждение email</h2>
+                <p style={{ color: '#555', fontSize: '14px' }}>
+                    Код отправлен на <strong>{pendingEmail}</strong>. Введите его ниже.
+                </p>
+                <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <input
+                        placeholder="6-значный код"
+                        value={code}
+                        onChange={e => setCode(e.target.value)}
+                        maxLength={6}
+                        style={{ padding: '8px', letterSpacing: '6px', fontSize: '20px', textAlign: 'center' }}
+                    />
+                    <button type="submit" disabled={loading} style={{ padding: '10px', cursor: 'pointer', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '5px' }}>
+                        {loading ? 'Проверка...' : 'Подтвердить'}
+                    </button>
+                </form>
+                <button onClick={() => setPendingEmail(null)} style={{ marginTop: '15px', background: 'none', border: 'none', color: '#007bff', cursor: 'pointer' }}>
+                    ← Назад
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '10px', fontFamily: 'Arial' }}>
@@ -56,8 +106,8 @@ const Login = ({ setAuth }) => {
                 <input placeholder="Email" type="email" required onChange={e => setFormData({...formData, email: e.target.value})} style={{padding: '8px'}} />
                 <input placeholder="Пароль" type="password" required onChange={e => setFormData({...formData, pass: e.target.value})} style={{padding: '8px'}} />
                 {!isLogin && <input placeholder="Повторите пароль" type="password" onChange={e => setFormData({...formData, confirmPass: e.target.value})} style={{padding: '8px'}} />}
-                <button type="submit" style={{padding: '10px', cursor: 'pointer', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '5px'}}>
-                    {isLogin ? 'Войти' : 'Создать аккаунт'}
+                <button type="submit" disabled={loading} style={{padding: '10px', cursor: 'pointer', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '5px'}}>
+                    {loading ? 'Отправка...' : isLogin ? 'Войти' : 'Создать аккаунт'}
                 </button>
             </form>
             <button onClick={() => setIsLogin(!isLogin)} style={{ marginTop: '15px', background: 'none', border: 'none', color: '#007bff', cursor: 'pointer' }}>
