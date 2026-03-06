@@ -178,6 +178,19 @@ const Dashboard = ({ setAuth }) => {
         navigate('/login');
     };
 
+    const handleDeleteAccount = async () => {
+        if (!window.confirm('Вы уверены? Аккаунт будет удалён безвозвратно.')) return;
+        try {
+            await axios.delete(`${API}/api/auth/account`);
+            setAuth(false);
+            localStorage.removeItem('isAuthenticated');
+            navigate('/login');
+        } catch (err) {
+            const data = err.response?.data;
+            alert('Ошибка: ' + (typeof data === 'string' ? data : 'Не удалось удалить аккаунт.'));
+        }
+    };
+
     useEffect(() => {
         axios.get(`${API}/stock/api/getTickers`)
             .then(res => {
@@ -247,7 +260,10 @@ const Dashboard = ({ setAuth }) => {
                     <span className="dash-logo">MOEX</span>
                     <span className="dash-title">Аналитика</span>
                 </div>
-                <button className="btn-logout" onClick={handleLogout}>Выход</button>
+                <div className="dash-header-actions">
+                    <button className="btn-logout" onClick={handleLogout}>Выход</button>
+                    <button className="btn-delete-account" onClick={handleDeleteAccount}>Удалить аккаунт</button>
+                </div>
             </header>
 
             <div className="dash-body">

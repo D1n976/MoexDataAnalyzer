@@ -6,6 +6,7 @@ import com.example.demo.service.UserService;
 import com.example.demo.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -69,6 +70,19 @@ public class AuthController {
             return ResponseEntity.ok("Регистрация завершена! Войдите в аккаунт.");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/account")
+    public ResponseEntity<String> deleteAccount(HttpServletRequest request, Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            userService.deleteByEmail(email);
+            HttpSession session = request.getSession(false);
+            if (session != null) session.invalidate();
+            return ResponseEntity.ok("Аккаунт удалён.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Ошибка при удалении аккаунта.");
         }
     }
 
