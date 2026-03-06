@@ -22,14 +22,19 @@ const ProtectedRoute = ({ children, isAuthenticated }) => {
 const Login = ({ setAuth }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({ name: '', email: '', pass: '', confirmPass: '' });
-    const [pendingEmail, setPendingEmail] = useState(null); // email ожидающий верификации
+    const [pendingEmail, setPendingEmail] = useState(null);
     const [code, setCode] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const navigate = useNavigate();
+
+    const switchMode = (login) => { setIsLogin(login); setError(''); setSuccess(''); };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
         const payload = isLogin
             ? { email: formData.email, password: formData.pass }
             : { name: formData.name, email: formData.email, pass: formData.pass, confirmPass: formData.confirmPass };
@@ -42,13 +47,11 @@ const Login = ({ setAuth }) => {
                 localStorage.setItem('isAuthenticated', 'true');
                 navigate('/dashboard');
             } else {
-                // Сервер отправил код — переходим на экран верификации
                 setPendingEmail(formData.email);
             }
         } catch (err) {
             const data = err.response?.data;
-            const msg = typeof data === 'string' ? data : data?.message || data?.error || "Проверьте данные";
-            alert("Ошибка: " + msg);
+            setError(typeof data === 'string' ? data : data?.message || data?.error || "Проверьте данные");
         } finally {
             setLoading(false);
         }
@@ -57,60 +60,58 @@ const Login = ({ setAuth }) => {
     const handleVerify = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
         try {
             await axios.post(`${API}/api/auth/verify`, { email: pendingEmail, code });
-            alert("Регистрация завершена! Войдите в аккаунт.");
             setPendingEmail(null);
             setIsLogin(true);
+            setSuccess("Регистрация завершена! Войдите в аккаунт.");
         } catch (err) {
             const data = err.response?.data;
-            const msg = typeof data === 'string' ? data : data?.message || data?.error || "Ошибка верификации";
-            alert("Ошибка: " + msg);
+            setError(typeof data === 'string' ? data : data?.message || data?.error || "Ошибка верификации");
         } finally {
             setLoading(false);
         }
     };
 
-    // Экран ввода кода
     if (pendingEmail) {
         return (
-            <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '10px', fontFamily: 'Arial' }}>
-                <h2>Подтверждение email</h2>
-                <p style={{ color: '#555', fontSize: '14px' }}>
-                    Код отправлен на <strong>{pendingEmail}</strong>. Введите его ниже.
-                </p>
-                <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div className="auth-card">
+                <h2 className="auth-title">Подтверждение email</h2>
+                <p className="auth-hint">Код отправлен на <strong>{pendingEmail}</strong>. Введите его ниже.</p>
+                {error && <div className="form-message error">{error}</div>}
+                <form onSubmit={handleVerify} className="auth-form">
                     <input
-                        placeholder="6-значный код"
+                        className="auth-input code-input"
+                        placeholder="000000"
                         value={code}
-                        onChange={e => setCode(e.target.value)}
+                        onChange={e => { setCode(e.target.value); setError(''); }}
                         maxLength={6}
-                        style={{ padding: '8px', letterSpacing: '6px', fontSize: '20px', textAlign: 'center' }}
                     />
-                    <button type="submit" disabled={loading} style={{ padding: '10px', cursor: 'pointer', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '5px' }}>
+                    <button type="submit" disabled={loading} className="auth-btn">
                         {loading ? 'Проверка...' : 'Подтвердить'}
                     </button>
                 </form>
-                <button onClick={() => setPendingEmail(null)} style={{ marginTop: '15px', background: 'none', border: 'none', color: '#007bff', cursor: 'pointer' }}>
-                    ← Назад
-                </button>
+                <button onClick={() => { setPendingEmail(null); setError(''); }} className="auth-link">← Назад</button>
             </div>
         );
     }
 
     return (
-        <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '10px', fontFamily: 'Arial' }}>
-            <h2>{isLogin ? 'Вход в систему' : 'Регистрация'}</h2>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {!isLogin && <input placeholder="Имя" onChange={e => setFormData({...formData, name: e.target.value})} style={{padding: '8px'}} />}
-                <input placeholder="Email" type="email" required onChange={e => setFormData({...formData, email: e.target.value})} style={{padding: '8px'}} />
-                <input placeholder="Пароль" type="password" required onChange={e => setFormData({...formData, pass: e.target.value})} style={{padding: '8px'}} />
-                {!isLogin && <input placeholder="Повторите пароль" type="password" onChange={e => setFormData({...formData, confirmPass: e.target.value})} style={{padding: '8px'}} />}
-                <button type="submit" disabled={loading} style={{padding: '10px', cursor: 'pointer', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '5px'}}>
+        <div className="auth-card">
+            <h2 className="auth-title">{isLogin ? 'Вход в систему' : 'Регистрация'}</h2>
+            {error && <div className="form-message error">{error}</div>}
+            {success && <div className="form-message success">{success}</div>}
+            <form onSubmit={handleSubmit} className="auth-form">
+                {!isLogin && <input className="auth-input" placeholder="Имя" onChange={e => { setFormData({...formData, name: e.target.value}); setError(''); }} />}
+                <input className="auth-input" placeholder="Email" type="email" required onChange={e => { setFormData({...formData, email: e.target.value}); setError(''); }} />
+                <input className="auth-input" placeholder="Пароль" type="password" required onChange={e => { setFormData({...formData, pass: e.target.value}); setError(''); }} />
+                {!isLogin && <input className="auth-input" placeholder="Повторите пароль" type="password" onChange={e => { setFormData({...formData, confirmPass: e.target.value}); setError(''); }} />}
+                <button type="submit" disabled={loading} className="auth-btn">
                     {loading ? 'Отправка...' : isLogin ? 'Войти' : 'Создать аккаунт'}
                 </button>
             </form>
-            <button onClick={() => setIsLogin(!isLogin)} style={{ marginTop: '15px', background: 'none', border: 'none', color: '#007bff', cursor: 'pointer' }}>
+            <button onClick={() => switchMode(!isLogin)} className="auth-link">
                 {isLogin ? 'Еще нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
             </button>
         </div>
@@ -166,11 +167,18 @@ const Dashboard = ({ setAuth }) => {
     const [tickers, setTickers] = useState([]);
     const [selected, setSelected] = useState([]);
     const [range, setRange] = useState({ from: '2024-01-01', till: '2024-12-31' });
-    const [chartData, setChartData] = useState([]);    // [{date, SBER: 280, GAZP: 150, ...}]
-    const [stats, setStats] = useState({});            // {SBER: AnalysisResult, ...}
+    const [chartData, setChartData] = useState([]);
+    const [stats, setStats] = useState({});
     const [loading, setLoading] = useState(false);
-    const [viewMode, setViewMode] = useState('combined'); // 'combined' | 'individual'
+    const [viewMode, setViewMode] = useState('combined');
+    const [notification, setNotification] = useState(null); // {type:'error'|'success', msg:''}
+    const [confirmDelete, setConfirmDelete] = useState(false);
     const navigate = useNavigate();
+
+    const showNotification = (type, msg) => {
+        setNotification({ type, msg });
+        setTimeout(() => setNotification(null), 4000);
+    };
 
     const handleLogout = () => {
         setAuth(false);
@@ -179,15 +187,15 @@ const Dashboard = ({ setAuth }) => {
     };
 
     const handleDeleteAccount = async () => {
-        if (!window.confirm('Вы уверены? Аккаунт будет удалён безвозвратно.')) return;
         try {
             await axios.delete(`${API}/api/auth/account`);
             setAuth(false);
             localStorage.removeItem('isAuthenticated');
             navigate('/login');
         } catch (err) {
+            setConfirmDelete(false);
             const data = err.response?.data;
-            alert('Ошибка: ' + (typeof data === 'string' ? data : 'Не удалось удалить аккаунт.'));
+            showNotification('error', typeof data === 'string' ? data : 'Не удалось удалить аккаунт.');
         }
     };
 
@@ -240,7 +248,7 @@ const Dashboard = ({ setAuth }) => {
             analysisResults.forEach(({ ticker, data }) => { statsObj[ticker] = data; });
             setStats(statsObj);
         } catch {
-            alert("Ошибка загрузки данных. Проверьте соединение с сервером.");
+            showNotification('error', 'Ошибка загрузки данных. Проверьте соединение с сервером.');
         } finally {
             setLoading(false);
         }
@@ -261,10 +269,26 @@ const Dashboard = ({ setAuth }) => {
                     <span className="dash-title">Аналитика</span>
                 </div>
                 <div className="dash-header-actions">
-                    <button className="btn-logout" onClick={handleLogout}>Выход</button>
-                    <button className="btn-delete-account" onClick={handleDeleteAccount}>Удалить аккаунт</button>
+                    {confirmDelete ? (
+                        <div className="delete-confirm">
+                            <span className="delete-confirm-text">Вы уверены?</span>
+                            <button className="btn-danger" onClick={handleDeleteAccount}>Да, удалить</button>
+                            <button className="btn-cancel" onClick={() => setConfirmDelete(false)}>Отмена</button>
+                        </div>
+                    ) : (
+                        <>
+                            <button className="btn-logout" onClick={handleLogout}>Выход</button>
+                            <button className="btn-delete-account" onClick={() => setConfirmDelete(true)}>Удалить аккаунт</button>
+                        </>
+                    )}
                 </div>
             </header>
+            {notification && (
+                <div className={`notification ${notification.type}`}>
+                    <span>{notification.msg}</span>
+                    <button className="notification-close" onClick={() => setNotification(null)}>✕</button>
+                </div>
+            )}
 
             <div className="dash-body">
                 {/* Сайдбар */}
