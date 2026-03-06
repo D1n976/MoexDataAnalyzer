@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -173,6 +173,8 @@ const Dashboard = ({ setAuth }) => {
     const [viewMode, setViewMode] = useState('combined');
     const [notification, setNotification] = useState(null); // {type:'error'|'success', msg:''}
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [exporting, setExporting] = useState(false);
+    const chartAreaRef = useRef(null);
     const navigate = useNavigate();
 
     const showNotification = (type, msg) => {
@@ -251,6 +253,26 @@ const Dashboard = ({ setAuth }) => {
             showNotification('error', 'Ошибка загрузки данных. Проверьте соединение с сервером.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const exportToPdf = async () => {
+        if (!chartAreaRef.current) return;
+        setExporting(true);
+        try {
+            const html2canvas = (await import('html2canvas')).default;
+            const { jsPDF } = await import('jspdf');
+            const canvas = await html2canvas(chartAreaRef.current, { scale: 2, useCORS: true, backgroundColor: '#f5f6fa' });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const pdfW = pdf.internal.pageSize.getWidth();
+            const pdfH = (canvas.height * pdfW) / canvas.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+            pdf.save(`moex_${selected.join('-')}_${range.from}_${range.till}.pdf`);
+        } catch {
+            showNotification('error', 'Не удалось сохранить PDF.');
+        } finally {
+            setExporting(false);
         }
     };
 
@@ -346,21 +368,26 @@ const Dashboard = ({ setAuth }) => {
                     </button>
 
                     {hasData && (
-                        <div className="view-toggle">
-                            <button
-                                className={viewMode === 'combined' ? 'active' : ''}
-                                onClick={() => setViewMode('combined')}
-                            >Совмещённый</button>
-                            <button
-                                className={viewMode === 'individual' ? 'active' : ''}
-                                onClick={() => setViewMode('individual')}
-                            >Раздельный</button>
-                        </div>
+                        <>
+                            <div className="view-toggle">
+                                <button
+                                    className={viewMode === 'combined' ? 'active' : ''}
+                                    onClick={() => setViewMode('combined')}
+                                >Совмещённый</button>
+                                <button
+                                    className={viewMode === 'individual' ? 'active' : ''}
+                                    onClick={() => setViewMode('individual')}
+                                >Раздельный</button>
+                            </div>
+                            <button className="btn-export" onClick={exportToPdf} disabled={exporting}>
+                                {exporting ? 'Экспорт...' : 'Скачать PDF'}
+                            </button>
+                        </>
                     )}
                 </aside>
 
                 {/* Основной контент */}
-                <main className="main-content">
+                <main className="main-content" ref={chartAreaRef}>
                     {!hasData ? (
                         <div className="empty-state">
                             <div className="empty-icon">📈</div>

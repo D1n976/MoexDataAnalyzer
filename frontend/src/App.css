@@ -355,6 +355,28 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
 
+/* ── EXPORT BUTTON ── */
+.btn-export {
+    width: 100%;
+    padding: 9px;
+    margin-top: 8px;
+    background: transparent;
+    border: 1px solid #6366f1;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6366f1;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.btn-export:hover:not(:disabled) {
+    background: #eef0ff;
+}
+.btn-export:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* ── MAIN CONTENT ── */
 .main-content {
     flex: 1;
