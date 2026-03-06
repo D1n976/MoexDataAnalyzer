@@ -35,6 +35,9 @@ public class VerificationService {
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new RuntimeException("Пользователь с такой почтой уже существует");
         }
+        if (userRepository.existsByName(userDto.getName())) {
+            throw new RuntimeException("Имя \"" + userDto.getName() + "\" уже занято");
+        }
 
         String code = String.format("%06d", new Random().nextInt(1_000_000));
         pending.put(userDto.getEmail(), new PendingVerification(code, LocalDateTime.now().plusMinutes(10), userDto));
@@ -59,8 +62,11 @@ public class VerificationService {
         if (!pv.code.equals(code)) {
             throw new RuntimeException("Неверный код подтверждения.");
         }
-        pending.remove(email);
         return pv.userDto;
+    }
+
+    public void removePending(String email) {
+        pending.remove(email);
     }
 
     public static class PendingVerification {

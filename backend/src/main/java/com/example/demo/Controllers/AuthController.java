@@ -65,6 +65,7 @@ public class AuthController {
         try {
             UserDto userDto = verificationService.verifyCode(request.getEmail(), request.getCode());
             userService.registerUser(userDto);
+            verificationService.removePending(request.getEmail());
             return ResponseEntity.ok("Регистрация завершена! Войдите в аккаунт.");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
