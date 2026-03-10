@@ -276,6 +276,9 @@ const Dashboard = ({ setAuth }) => {
         }
     };
 
+    const fmtDate = d =>
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
     const setPrevWeek = () => {
         const today = new Date();
         const dayOfWeek = today.getDay(); // 0=Sun
@@ -284,16 +287,14 @@ const Dashboard = ({ setAuth }) => {
         lastMonday.setDate(today.getDate() - daysToLastMonday - 7);
         const lastSunday = new Date(lastMonday);
         lastSunday.setDate(lastMonday.getDate() + 6);
-        const fmt = d => d.toISOString().slice(0, 10);
-        setRange({ from: fmt(lastMonday), till: fmt(lastSunday) });
+        setRange({ from: fmtDate(lastMonday), till: fmtDate(lastSunday) });
     };
 
     const setPrevMonth = () => {
         const today = new Date();
         const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
         const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
-        const fmt = d => d.toISOString().slice(0, 10);
-        setRange({ from: fmt(firstDay), till: fmt(lastDay) });
+        setRange({ from: fmtDate(firstDay), till: fmtDate(lastDay) });
     };
 
     const getTickerData = (ticker) =>
