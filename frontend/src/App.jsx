@@ -276,6 +276,26 @@ const Dashboard = ({ setAuth }) => {
         }
     };
 
+    const setPrevWeek = () => {
+        const today = new Date();
+        const dayOfWeek = today.getDay(); // 0=Sun
+        const daysToLastMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const lastMonday = new Date(today);
+        lastMonday.setDate(today.getDate() - daysToLastMonday - 7);
+        const lastSunday = new Date(lastMonday);
+        lastSunday.setDate(lastMonday.getDate() + 6);
+        const fmt = d => d.toISOString().slice(0, 10);
+        setRange({ from: fmt(lastMonday), till: fmt(lastSunday) });
+    };
+
+    const setPrevMonth = () => {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+        const fmt = d => d.toISOString().slice(0, 10);
+        setRange({ from: fmt(firstDay), till: fmt(lastDay) });
+    };
+
     const getTickerData = (ticker) =>
         chartData
             .map(d => ({ date: d.date, CLOSE: d[ticker] }))
@@ -341,6 +361,10 @@ const Dashboard = ({ setAuth }) => {
 
                     <div className="sidebar-section">
                         <h4 className="sidebar-label">Период</h4>
+                        <div className="period-presets">
+                            <button className="btn-preset" onClick={setPrevWeek}>Прошлая неделя</button>
+                            <button className="btn-preset" onClick={setPrevMonth}>Прошлый месяц</button>
+                        </div>
                         <label className="date-label">С</label>
                         <input
                             type="date"

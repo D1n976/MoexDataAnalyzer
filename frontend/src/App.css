@@ -306,6 +306,28 @@
     background: #fff;
 }
 
+/* ── PERIOD PRESETS ── */
+.period-presets {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+.btn-preset {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 11px;
+    background: #f0f0ff;
+    color: #6366f1;
+    border: 1px solid #c7c8f7;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.btn-preset:hover {
+    background: #6366f1;
+    color: #fff;
+}
+
 /* ── LOAD BUTTON ── */
 .btn-load {
     width: 100%;
