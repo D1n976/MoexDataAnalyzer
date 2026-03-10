@@ -3,9 +3,9 @@ services:
     image: postgres:15-alpine
     container_name: moex_db
     environment:
-      - POSTGRES_USER=${DB_USERNAME}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=moexDatabase
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: moexDatabase
     ports:
       - "5432:5432"
     volumes:
@@ -16,24 +16,39 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: moex_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
   app:
     build: ./backend
     container_name: moex_app
     ports:
       - "8081:8081"
     environment:
-      - DB_URL=jdbc:postgresql://db:5432/moexDatabase
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - CORS_ORIGIN=http://localhost,http://81.200.158.78
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT}
-      - SMTP_USERNAME=${SMTP_USERNAME}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - SMTP_FROM=${SMTP_FROM}
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_REDIS_HOST=${REDIS_HOST}
+      - SPRING_REDIS_PORT=${REDIS_PORT}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      # Mapping your .env names to what Spring expects
+      - SPRING_MAIL_HOST=${SMTP_HOST}
+      - SPRING_MAIL_PORT=${SMTP_PORT}
+      - SPRING_MAIL_USERNAME=${SMTP_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SMTP_PASSWORD}
+      - SPRING_MAIL_FROM=${SMTP_FROM}
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
 
   frontend:
     build: ./frontend
@@ -45,3 +60,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
