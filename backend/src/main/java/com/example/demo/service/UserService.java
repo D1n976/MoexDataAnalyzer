@@ -47,6 +47,10 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    public void deleteByEmail(String email) {
+        userRepository.findByEmail(email).ifPresent(userRepository::delete);
+    }
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
