@@ -38,3 +38,10 @@ build/
 
 ### Claude Code ###
 .claude/
+
+# --- Electron Build (desktop) ---
+desktop/dist_exe/
+desktop/dist/
+desktop/*.exe
+desktop/*.zip
+desktop/.electron-builder/

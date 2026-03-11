@@ -1,0 +1,48 @@
+# --- IDE & OS ---
+.idea/
+.vscode/
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
+
+# --- Java / Spring Boot (backend) ---
+backend/target/
+backend/*.jar
+backend/*.war
+backend/.factorypath
+backend/.project
+backend/.settings/
+backend/.classpath
+
+# --- Node.js (frontend & desktop) ---
+**/node_modules/
+**/npm-debug.log*
+**/yarn-error.log*
+**/.pnp.js
+**/.pnp
+
+# --- React Build (frontend) ---
+frontend/dist/
+frontend/build/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# --- Electron Build (desktop) ---
+desktop/dist_exe/
+desktop/dist/
+desktop/*.exe
+desktop/*.zip
+desktop/.electron-builder/
+
+# --- Docker & Environment ---
+.env
+**/docker-compose.override.yml
+postgres_data/
+redis_data/
+
+# --- Logs ---
+*.log
+logs/
