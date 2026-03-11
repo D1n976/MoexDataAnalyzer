@@ -35,9 +35,17 @@ const Login = ({ setAuth }) => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        // ИСПРАВЛЕНО: Теперь и для логина, и для регистрации используется ключ "pass"
+        // Это соответствует твоему Java UserDto с @JsonProperty("pass")
         const payload = isLogin
-            ? { email: formData.email, password: formData.pass }
-            : { name: formData.name, email: formData.email, pass: formData.pass, confirmPass: formData.confirmPass };
+            ? { email: formData.email, pass: formData.pass } 
+            : { 
+                name: formData.name, 
+                email: formData.email, 
+                pass: formData.pass, 
+                confirmPass: formData.confirmPass 
+              };
 
         try {
             const url = `${API}/api/auth/${isLogin ? 'login' : 'register'}`;
@@ -171,7 +179,7 @@ const Dashboard = ({ setAuth }) => {
     const [stats, setStats] = useState({});
     const [loading, setLoading] = useState(false);
     const [viewMode, setViewMode] = useState('combined');
-    const [notification, setNotification] = useState(null); // {type:'error'|'success', msg:''}
+    const [notification, setNotification] = useState(null); 
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [exporting, setExporting] = useState(false);
     const chartAreaRef = useRef(null);
@@ -233,7 +241,6 @@ const Dashboard = ({ setAuth }) => {
                 )),
             ]);
 
-            // Объединяем данные по дате
             const dateMap = new Map();
             candleResults.forEach(({ ticker, data }) => {
                 data.forEach(candle => {
@@ -313,7 +320,6 @@ const Dashboard = ({ setAuth }) => {
             )}
 
             <div className="dash-body">
-                {/* Сайдбар */}
                 <aside className="sidebar">
                     <div className="sidebar-section">
                         <h4 className="sidebar-label">Инструменты</h4>
@@ -386,7 +392,6 @@ const Dashboard = ({ setAuth }) => {
                     )}
                 </aside>
 
-                {/* Основной контент */}
                 <main className="main-content" ref={chartAreaRef}>
                     {!hasData ? (
                         <div className="empty-state">
@@ -453,7 +458,6 @@ const Dashboard = ({ setAuth }) => {
                                 </div>
                             )}
 
-                            {/* Карточки статистики */}
                             {Object.keys(stats).length > 0 && (
                                 <div className="stats-section">
                                     <h3 className="stats-title">Статистика за период</h3>

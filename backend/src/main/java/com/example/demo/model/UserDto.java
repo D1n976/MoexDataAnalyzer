@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 
 @Data
@@ -7,10 +9,16 @@ public class UserDto {
     private String name;
     private String email;
     private String pass;
+    @JsonProperty("confirmPass")
     private String confirmPass;
 
     public boolean passwordsMatch() {
-        return pass != null && pass.equals(confirmPass);
+        System.out.println(String.format("%s = %s", pass, confirmPass));
+            
+        if (pass == null || confirmPass == null) {
+            return false;
+        }
+        return pass.trim().equals(confirmPass.trim());
     }
 
     public String getName() { return name; }
