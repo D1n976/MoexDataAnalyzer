@@ -25,7 +25,7 @@ services:
       - DB_URL=jdbc:postgresql://db:5432/moexDatabase
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
-      - CORS_ORIGIN=http://localhost,http://81.200.158.78
+      - CORS_ORIGIN=http://localhost,http://81.200.158.78,http://81.200.158.78.nip.io
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USERNAME=${SMTP_USERNAME}
