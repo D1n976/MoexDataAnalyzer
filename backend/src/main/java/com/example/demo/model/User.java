@@ -24,11 +24,14 @@ public class User implements UserDetails {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String pass;
 
     @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(name = "google_id", unique = true)
+    private String googleId;
 
     // --- Методы UserDetails ---
 
