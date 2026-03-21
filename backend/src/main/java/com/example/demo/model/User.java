@@ -70,4 +70,7 @@ public class User implements UserDetails {
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getGoogleId() { return googleId; }
+    public void setGoogleId(String googleId) { this.googleId = googleId; }
 }
