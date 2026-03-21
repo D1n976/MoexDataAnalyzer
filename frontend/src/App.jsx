@@ -517,6 +517,22 @@ export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(
         localStorage.getItem('isAuthenticated') === 'true'
     );
+    const [authChecked, setAuthChecked] = useState(
+        localStorage.getItem('isAuthenticated') === 'true'
+    );
+
+    useEffect(() => {
+        if (authChecked) return;
+        axios.get('/api/auth/me').then(() => {
+            localStorage.setItem('isAuthenticated', 'true');
+            setIsAuthenticated(true);
+        }).catch(() => {
+            localStorage.removeItem('isAuthenticated');
+            setIsAuthenticated(false);
+        }).finally(() => setAuthChecked(true));
+    }, []);
+
+    if (!authChecked) return null;
 
     return (
         <Router>

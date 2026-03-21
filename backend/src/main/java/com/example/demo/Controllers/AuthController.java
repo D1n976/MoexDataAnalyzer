@@ -73,6 +73,14 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<?> me(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/account")
     public ResponseEntity<String> deleteAccount(HttpServletRequest request, Authentication authentication) {
         try {
