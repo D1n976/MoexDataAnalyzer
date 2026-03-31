@@ -11,6 +11,7 @@
 - [Запуск](#запуск)
 
 ---
+<img width="4987" height="1982" alt="image" src="https://github.com/user-attachments/assets/52f396a4-5d87-4e22-9566-b1e529cc75af" />
 
 ## Архитектура
 
