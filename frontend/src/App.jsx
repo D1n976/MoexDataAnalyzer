@@ -39,12 +39,12 @@ const Login = ({ setAuth }) => {
         // ИСПРАВЛЕНО: Теперь и для логина, и для регистрации используется ключ "pass"
         // Это соответствует твоему Java UserDto с @JsonProperty("pass")
         const payload = isLogin
-            ? { email: formData.email, pass: formData.pass } 
-            : { 
-                name: formData.name, 
-                email: formData.email, 
-                pass: formData.pass, 
-                confirmPass: formData.confirmPass 
+            ? { email: formData.email, password: formData.pass }
+            : {
+                name: formData.name,
+                email: formData.email,
+                pass: formData.pass,
+                confirmPass: formData.confirmPass
               };
 
         try {
@@ -122,6 +122,16 @@ const Login = ({ setAuth }) => {
             <button onClick={() => switchMode(!isLogin)} className="auth-link">
                 {isLogin ? 'Еще нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
             </button>
+            <div className="auth-divider"><span>или</span></div>
+            <a href="/api/oauth2/authorization/google" className="auth-btn google-btn">
+                <svg width="18" height="18" viewBox="0 0 48 48" style={{marginRight: '8px', flexShrink: 0}}>
+                    <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85l6.09-6.09C34.46 3.08 29.5 1 24 1 14.82 1 7.07 6.48 3.69 14.22l7.07 5.49C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.1 24.5c0-1.64-.15-3.22-.42-4.75H24v9h12.42c-.54 2.93-2.17 5.41-4.62 7.08l7.12 5.53C43.18 37.28 46.1 31.36 46.1 24.5z"/>
+                    <path fill="#FBBC05" d="M10.76 28.29A14.5 14.5 0 0 1 9.5 24c0-1.49.26-2.93.72-4.29L3.15 14.22A23 23 0 0 0 1 24c0 3.72.87 7.23 2.42 10.35l7.34-6.06z"/>
+                    <path fill="#34A853" d="M24 47c6.48 0 11.93-2.14 15.9-5.82l-7.12-5.53c-2.17 1.45-4.95 2.35-8.78 2.35-6.26 0-11.57-4.22-13.24-9.71l-7.07 5.49C7.07 41.52 14.82 47 24 47z"/>
+                </svg>
+                Войти через Google
+            </a>
         </div>
     );
 };
@@ -226,11 +236,13 @@ const Dashboard = ({ setAuth }) => {
         );
     };
 
-    const loadData = async () => {
+    const loadData = async (overrideFrom, overrideTill) => {
         if (selected.length === 0) return;
         setLoading(true);
+        const from = overrideFrom ?? range.from;
+        const till = overrideTill ?? range.till;
         try {
-            const params = (secid) => ({ params: { secid, from: range.from, till: range.till } });
+            const params = (secid) => ({ params: { secid, from, till } });
 
             const [candleResults, analysisResults] = await Promise.all([
                 Promise.all(selected.map(t =>
@@ -294,14 +306,20 @@ const Dashboard = ({ setAuth }) => {
         lastMonday.setDate(today.getDate() - daysToLastMonday - 7);
         const lastSunday = new Date(lastMonday);
         lastSunday.setDate(lastMonday.getDate() + 6);
-        setRange({ from: fmtDate(lastMonday), till: fmtDate(lastSunday) });
+        const from = fmtDate(lastMonday);
+        const till = fmtDate(lastSunday);
+        setRange({ from, till });
+        loadData(from, till);
     };
 
     const setPrevMonth = () => {
         const today = new Date();
         const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
         const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
-        setRange({ from: fmtDate(firstDay), till: fmtDate(lastDay) });
+        const from = fmtDate(firstDay);
+        const till = fmtDate(lastDay);
+        setRange({ from, till });
+        loadData(from, till);
     };
 
     const getTickerData = (ticker) =>
@@ -511,6 +529,22 @@ export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(
         localStorage.getItem('isAuthenticated') === 'true'
     );
+    const [authChecked, setAuthChecked] = useState(
+        localStorage.getItem('isAuthenticated') === 'true'
+    );
+
+    useEffect(() => {
+        if (authChecked) return;
+        axios.get('/api/auth/me').then(() => {
+            localStorage.setItem('isAuthenticated', 'true');
+            setIsAuthenticated(true);
+        }).catch(() => {
+            localStorage.removeItem('isAuthenticated');
+            setIsAuthenticated(false);
+        }).finally(() => setAuthChecked(true));
+    }, []);
+
+    if (!authChecked) return null;
 
     return (
         <Router>
